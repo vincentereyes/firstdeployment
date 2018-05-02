@@ -1,9 +1,21 @@
 .margin {
 	margin-left: 20px;
 }
+.msgbotmar {
+	margin-bottom: 12px;
+}
 .reg {
 	width: 50%
 }
 .right {
 	text-align: right;
+}
+
+.moremargin {
+	margin-left: 40px;
+}
+
+.cmntfrm{
+	width: 90%;
+	float: right;
 }

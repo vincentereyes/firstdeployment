@@ -101,6 +101,29 @@ class UserManager(models.Manager):
 			errors['success'] = "Description Succesfully Saved!"
 		return errors
 
+	def delete(self, uid):
+		user = User.objects.get(id = uid)
+		user.delete()
+		pass
+
+	def msgvalid(self, postData):
+		errors = {}
+		if len(postData['msg']) < 1:
+			errors['msg'] = "Message field left blank!"
+		if len(errors) == 0:
+			Message.objects.create(content = postData['msg'], messenger_id = postData['mid'], receiver_id = postData['rid'])
+			errors['success'] = True
+		return errors
+
+	def cmntvalid(self, postData):
+		errors = {}
+		if postData['cmnt'] == "Add a comment" or len(postData['cmnt']) < 1:
+			errors['cmnt'] = "Comment field left blank!"
+		if len(errors) == 0:
+			Comment.objects.create(content = postData['cmnt'], commenter_id = postData['cid'], message_id = postData['cmid'])
+			errors['success'] = True
+		return errors
+
 class User(models.Model):
 	fname = models.CharField(max_length = 255)
 	lname = models.CharField(max_length = 255)
@@ -115,6 +138,7 @@ class User(models.Model):
 class Message(models.Model):
 	content = models.TextField()
 	created_at = models.DateTimeField(auto_now_add = True)
+	receiver = models.ForeignKey(User, related_name= "received_msgs")
 	messenger = models.ForeignKey(User, related_name = "messages")
 
 class Comment(models.Model):

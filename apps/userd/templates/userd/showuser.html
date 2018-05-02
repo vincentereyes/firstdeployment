@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>User Information</title>
+	 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	 {% load static %}
+	 <link rel="stylesheet" href="{% static 'userd/css/style.css' %}" media="screen" title="no title"  charset="utf-8">
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script> 
+</head>
+<body>
+<div class="container">
+	<nav class="navbar navbar-default">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+	      <p class="navbar-brand">
+	      	Test App
+	      	<a href="/dashboard" class="navbar-link margin">Dashboard</a>
+	      	<a href="/users/edit" class="navbar-link margin">Profile</a>
+	      </p>
+	      <a href="/logout"><button type="button" class="btn btn-primary navbar-btn margin">Logout</button></a>
+	    </div>
+	  </div>
+	</nav>
+	<h1>{{ user.fname }} {{ user.lname }}</h1>
+	<p>Registered at: {{ user.created_at }}</p>
+	<p>User ID: {{ user.id }}</p>
+	<p>Email Address: {{ user.email }}</p>
+	<p>Description: {{  user.desc}}</p>
+	<form action="/pstmsg" method="post">
+		{% csrf_token %}
+		<h4>Leave a message for {{ user.fname }}</h4>
+		<div class="form-group">
+				{% if messages %}
+  					<ul class="messages">
+    				{% for message in messages %}
+    					<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+    				{% endfor %}
+  					</ul>
+  				{% endif %}
+				<input type="hidden" name="rid" value="{{ user.id }}">
+				<input type="hidden" name="mid" value="{{ request.session.id }}">
+				<textarea class="form-control" rows="3" name="msg"></textarea>
+			<div class="right">
+				<input type="submit" name="submit" value="Post" class="btn btn-primary">
+			</div>
+		</div>
+		<hr>
+	</form>
+		{% for i in msg %}
+			<div class="container">
+				<p>{{ i.messenger.fname }} {{ i.messenger.lname }} wrote: </p>
+				<div class="margin msgbotmar">
+					{{ i.content }}
+				</div>
+				{% for j in cmnt%}
+					{% if i.id == j.message_id %}
+					<div class="margin msgbotmar">
+						<p>{{ j.commenter.fname}} {{ j.commenter.lname}} commented: </p>
+						<div class="margin msgbotmar">
+							{{ j.content }}
+						</div>
+					</div>
+					{% endif %}
+				{% endfor %}
+				<form action="/pstcmnt" method="post">
+					{% csrf_token %}
+  					<input type="hidden" name="cmid" value="{{ i.id }}">
+  					<input type="hidden" name="rid" value="{{ user.id }}">
+  					<input type="hidden" name="cid" value="{{ request.session.id }}">
+					<div class="form-group cmntfrm">
+						<textarea class="form-control" rows="3" name="cmnt">Add a comment</textarea>
+						<div class="right">
+							<input type="submit" name="submit" value="Post" class="btn btn-primary">
+						</div>
+					</div>
+				</form>
+			</div>
+		{% endfor %}		
+</div>
+</body>
+</html>

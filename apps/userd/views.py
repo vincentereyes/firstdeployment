@@ -126,7 +126,7 @@ def editdesc(request):
 		return redirect('/users/edit')
 
 def edituser(request, uid):
-	if request.session['user_level'] == 'admin':
+	if 'id' not in request.session or request.session['user_level'] == 'admin':
 		context = {
 			'user': User.objects.get(id = uid)
 		}
@@ -138,13 +138,65 @@ def edituser(request, uid):
 			return redirect('/dashboard')
 
 def adduser(request):
-	if request.session['user_level'] == 'admin':
-		return render(request, 'userd/adduser.html')
+	if 'id' not in request.session:
+		return redirect('/')
 	else:
-		if 'id' not in request.session:
-			return redirect('/')
+		if request.session['user_level'] == 'admin':
+			return render(request, 'userd/adduser.html')
 		else:
 			return redirect('/dashboard')
 
+def remove(request, uid):
+	if 'id' not in request.session:
+		return redirect('/')
+	else:
+		if request.session['user_level'] == 'admin':
+			context = {'id': uid}
+			return render(request, 'userd/remove.html', context)
+		else:
+			return redirect('/dashboard')
 
+def removeuser(request):
+	if request.method == "POST":
+		User.objects.delete(request.POST['uid'])
+		return redirect('/dashboard')
+	else:
+		return redirect('/dashboard')
+
+def showuser(request, uid):
+	if 'id' not in request.session:
+		return redirect('/')
+	else:
+		message = Message.objects.filter(receiver_id = uid)
+		comments = Comment.objects.all()
+		context = {
+			'user': User.objects.get(id = uid),
+			'msg' : message,
+			'cmnt' : comments
+		}
+		return render(request, 'userd/showuser.html', context)
+
+def pstmsg(request):
+	if request.method == "POST":
+		errors = User.objects.msgvalid(request.POST)
+		if 'success' not in errors:
+			for tag, error in errors.iteritems():
+				messages.error(request,error, extra_tags = tag)
+				return redirect('/users/show/' + str(request.POST['rid']))
+		else:
+			return redirect('/users/show/' + str(request.POST['rid']))
+	else:
+		return redirect('/users/show/' + str(request.POST['rid']))
+
+def pstcmnt(request):
+	if request.method == "POST":
+		errors = User.objects.cmntvalid(request.POST)
+		if 'success' not in errors:
+			for tag, error in errors.iteritems():
+				messages.error(request,error, extra_tags = tag)
+				return redirect('/users/show/' + str(request.POST['rid']))
+		else:
+			return redirect('/users/show/' + str(request.POST['rid']))
+	else:
+		return redirect('/users/show/' + str(request.POST['rid']))
 
